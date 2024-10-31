@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
-	// "github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -19,11 +19,25 @@ func NewGoAwsStack(scope constructs.Construct, id string, props *GoAwsStackProps
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	awslambda.NewFunction(stack, jsii.String("myLambdaFunction"), &awslambda.FunctionProps{
+	//* Create DB table
+	table := awsdynamodb.NewTable(stack, jsii.String("myUserTable"), &awsdynamodb.TableProps{
+		PartitionKey: &awsdynamodb.Attribute{
+			Name: jsii.String("username"), // should be the same as primary key
+			Type: awsdynamodb.AttributeType_STRING,
+		},
+		TableName:     jsii.String("userTable"),     // should be the same as TABLE_NAME
+		RemovalPolicy: awscdk.RemovalPolicy_DESTROY, // remove the DB when the stack is destroyed(cdk destroy)
+	})
+
+	myFunction := awslambda.NewFunction(stack, jsii.String("myLambdaFunction"), &awslambda.FunctionProps{
 		Runtime: awslambda.Runtime_PROVIDED_AL2023(),                                    // environment(Node, Ruby etc.). Here is a custom runtime because we are using Go
 		Code:    awslambda.AssetCode_FromAsset(jsii.String("lambda/function.zip"), nil), // code for the lambda function
 		Handler: jsii.String("main"),                                                    // handler for the lambda function
 	})
+
+	//* Grant the lambda function read/write access to the table
+	//* Doing this to connect the lambda function to the table
+	table.GrantReadWriteData(myFunction)
 
 	return stack
 }
