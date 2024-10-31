@@ -10,8 +10,8 @@ type DynamoDBClient struct {
 }
 
 func NewDynamoDBClient() DynamoDBClient {
-	dbSession := session.Must(session.NewSession())
-	db := dynamodb.New(dbSession)
+	dbSession := session.Must(session.NewSession()) // creates a new AWS session and panics if there is an error
+	db := dynamodb.New(dbSession)                   // creates a new DynamoDB client using the session
 
 	return DynamoDBClient{
 		dataBaseStore: db,
