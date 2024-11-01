@@ -29,6 +29,8 @@ func main() {
 		switch request.Path {
 		case "/register":
 			return lambdaApp.APIHandler.RegisterUserHandler(request)
+		case "/login":
+			return lambdaApp.APIHandler.LoginUser(request)
 		default:
 			return events.APIGatewayProxyResponse{
 				Body:       "Not Found",
