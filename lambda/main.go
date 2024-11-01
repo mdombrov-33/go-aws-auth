@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"lambda-func/app"
+	"lambda-func/middleware"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events" // allows us to extract paths, requests etc.
@@ -22,6 +23,13 @@ func HandleRequest(event MyEvent) (string, error) {
 	return fmt.Sprintf("Successfully called by - %s", event.Username), nil
 }
 
+func ProtectedHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return events.APIGatewayProxyResponse{
+		Body:       "This is protected path",
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
 func main() {
 	lambdaApp := app.NewApp()
 	//* Hook lambda function to the gateway
@@ -31,6 +39,8 @@ func main() {
 			return lambdaApp.APIHandler.RegisterUserHandler(request)
 		case "/login":
 			return lambdaApp.APIHandler.LoginUser(request)
+		case "/protected":
+			return middleware.ValidateJWTMiddleWare(ProtectedHandler)(request) // two () () is chaining the functions
 		default:
 			return events.APIGatewayProxyResponse{
 				Body:       "Not Found",
