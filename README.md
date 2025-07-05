@@ -16,6 +16,13 @@ A serverless user authentication service built with AWS Lambda and Go, providing
 ![Architecture](https://img.shields.io/badge/Architecture-Serverless-orange)
 ![Go](https://img.shields.io/badge/Go-1.20+-blue)
 ![AWS](https://img.shields.io/badge/AWS-Lambda-yellow)
+![DynamoDB](https://img.shields.io/badge/Database-DynamoDB-blue)
+![JWT](https://img.shields.io/badge/Auth-JWT-green)
+![API Gateway](https://img.shields.io/badge/API-Gateway-purple)
+![X-Ray](https://img.shields.io/badge/Tracing-X--Ray-red)
+![CDK](https://img.shields.io/badge/IaC-CDK-orange)
+![Docker](https://img.shields.io/badge/Container-Docker-blue)
+![Security](https://img.shields.io/badge/Security-Bcrypt-red)
 
 ### Tech Stack
 
