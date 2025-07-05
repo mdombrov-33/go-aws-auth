@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events" // allows us to extract paths, requests etc.
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-xray-sdk-go/xray"
 )
 
 type MyEvent struct {
