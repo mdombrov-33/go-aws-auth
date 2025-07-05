@@ -174,6 +174,39 @@ You can test Lambda handlers locally using:
 3. Review Lambda logs in CloudWatch
 4. Test API endpoints with proper headers and payloads
 
+## Future Improvements
+
+1. **Password Reset Functionality**  
+   Add a secure password reset flow with email verification or temporary tokens, so users can recover access safely.
+
+2. **Multi-Factor Authentication (MFA)**  
+   Implement MFA using AWS Cognito or custom flows to boost security on login.
+
+3. **Better Error Handling and Retries**  
+   Add exponential backoff retries for DynamoDB requests and improved error messages to handle transient AWS service errors gracefully.
+
+4. **Rate Limiting and Throttling**  
+   Protect APIs from abuse using API Gateway throttling or custom Lambda logic.
+
+5. **User Role Management & Authorization**  
+   Add roles and permissions for users, controlling access to certain endpoints or resources.
+
+6. **Infrastructure as Code Improvements**  
+   Expand CDK stack to manage multiple environments (dev/staging/prod) with easier deployments and automated CI/CD pipelines.
+
+7. **Monitoring & Alerting**  
+   Set up CloudWatch alarms for error rates and latency, plus integrate with SNS or Slack for real-time alerts.
+
+8. **Use AWS Secrets Manager**  
+   Securely manage sensitive configs like JWT secrets or DB credentials instead of hardcoding them.
+
+9. **API Gateway Improvements**  
+   Use request/response validation, schema enforcement, and caching for better performance and security.
+
+10. **Move to AWS Cognito or Amplify**  
+    Evaluate using AWS Cognito for user pools and authentication to reduce custom auth code and improve scalability.
+
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
