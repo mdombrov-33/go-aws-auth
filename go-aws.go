@@ -32,11 +32,14 @@ func NewGoAwsStack(scope constructs.Construct, id string, props *GoAwsStackProps
 
 	//* Create a lambda function with Docker Image
 	myFunction := awslambda.NewDockerImageFunction(stack, jsii.String("myLambdaFunction"), &awslambda.DockerImageFunctionProps{
+		//* use a Docker image for the lambda function
 		Code: awslambda.DockerImageCode_FromImageAsset(jsii.String("./lambda"), nil),
 
 		//* use ARM64 architecture for better performance and cost
 		//* need to specify the architecture because linux can operate on both x86 and ARM
 		Architecture: awslambda.Architecture_X86_64(),
+
+		Tracing: awslambda.Tracing_ACTIVE, //* enable tracing for the lambda function
 	})
 
 	//* Grant the lambda function read/write access to the table
