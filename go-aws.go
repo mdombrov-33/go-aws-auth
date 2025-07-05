@@ -30,12 +30,12 @@ func NewGoAwsStack(scope constructs.Construct, id string, props *GoAwsStackProps
 		RemovalPolicy: awscdk.RemovalPolicy_DESTROY, // remove the DB when the stack is destroyed(cdk destroy)
 	})
 
-	myFunction := awslambda.NewFunction(stack, jsii.String("myLambdaFunction"), &awslambda.FunctionProps{
-		Runtime: awslambda.Runtime_FROM_IMAGE(),                                   //* runtime for the lambda function (using docker image)
-		Code:    awslambda.EcrImageCode_FromAsset(jsii.String(("./lambda")), nil), //* point to Dockerfile directory
-		Handler: jsii.String("main"),                                              //* for images, this is usually the entrypoint in the Dockerfile
-		//* Architecture for the lambda function (using ARM64 for cost efficiency), we specify this because in Dockerfile we have GOOS=linux go build -o main line
-		//* By adding this, we ensure that the lambda function is built for Linux ARM64 architecture
+	//* Create a lambda function with Docker Image
+	myFunction := awslambda.NewDockerImageFunction(stack, jsii.String("myLambdaFunction"), &awslambda.DockerImageFunctionProps{
+		Code: awslambda.DockerImageCode_FromImageAsset(jsii.String("./lambda"), nil),
+
+		//* use ARM64 architecture for better performance and cost
+		//* need to specify the architecture because linux can operate on both x86 and ARM
 		Architecture: awslambda.Architecture_ARM_64(),
 	})
 
