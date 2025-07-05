@@ -31,9 +31,12 @@ func NewGoAwsStack(scope constructs.Construct, id string, props *GoAwsStackProps
 	})
 
 	myFunction := awslambda.NewFunction(stack, jsii.String("myLambdaFunction"), &awslambda.FunctionProps{
-		Runtime: awslambda.Runtime_PROVIDED_AL2023(),                                    // environment(Node, Ruby etc.). Here is a custom runtime because we are using Go
-		Code:    awslambda.AssetCode_FromAsset(jsii.String("lambda/function.zip"), nil), // code for the lambda function
-		Handler: jsii.String("main"),                                                    // handler for the lambda function
+		Runtime: awslambda.Runtime_FROM_IMAGE(),                                   //* runtime for the lambda function (using docker image)
+		Code:    awslambda.EcrImageCode_FromAsset(jsii.String(("./lambda")), nil), //* point to Dockerfile directory
+		Handler: jsii.String("main"),                                              //* for images, this is usually the entrypoint in the Dockerfile
+		//* Architecture for the lambda function (using ARM64 for cost efficiency), we specify this because in Dockerfile we have GOOS=linux go build -o main line
+		//* By adding this, we ensure that the lambda function is built for Linux ARM64 architecture
+		Architecture: awslambda.Architecture_ARM_64(),
 	})
 
 	//* Grant the lambda function read/write access to the table
