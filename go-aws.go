@@ -77,7 +77,7 @@ func main() {
 
 	app := awscdk.NewApp(nil)
 
-	NewGoAwsStack(app, "GoAwsStack", &GoAwsStackProps{
+	NewGoAwsStack(app, "AuthStack", &GoAwsStackProps{
 		awscdk.StackProps{
 			Env: env(),
 		},

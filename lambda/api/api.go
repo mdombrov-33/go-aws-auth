@@ -111,10 +111,26 @@ func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.A
 	}
 
 	accessToken := types.CreateToken(user)
-	successMsg := fmt.Sprintf(`{"access_token": "%s"}`, accessToken)
+
+	if accessToken == "" {
+		return events.APIGatewayProxyResponse{
+			Body:       "Internal Server Error",
+			StatusCode: http.StatusInternalServerError,
+		}, nil
+	}
+
+	//* Prepare the response with the access token
+	responseBody, err := json.Marshal(map[string]string{"access_token": accessToken})
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       "Internal Server Error",
+			StatusCode: http.StatusInternalServerError,
+		}, fmt.Errorf("error marshalling response: %w", err)
+	}
 
 	return events.APIGatewayProxyResponse{
-		Body:       successMsg,
 		StatusCode: http.StatusOK,
+		Headers:    map[string]string{"Content-Type": "application/json"},
+		Body:       string(responseBody),
 	}, nil
 }
