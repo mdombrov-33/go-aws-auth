@@ -6,9 +6,10 @@ import (
 	"lambda-func/middleware"
 	"net/http"
 
+	"context"
+
 	"github.com/aws/aws-lambda-go/events" // allows us to extract paths, requests etc.
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-xray-sdk-go/xray"
 )
 
 type MyEvent struct {
@@ -34,12 +35,12 @@ func ProtectedHandler(request events.APIGatewayProxyRequest) (events.APIGatewayP
 func main() {
 	lambdaApp := app.NewApp()
 	//* Hook lambda function to the gateway
-	lambda.Start(func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	lambda.Start(func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		switch request.Path {
 		case "/register":
-			return lambdaApp.APIHandler.RegisterUserHandler(request)
+			return lambdaApp.APIHandler.RegisterUserHandler(ctx, request)
 		case "/login":
-			return lambdaApp.APIHandler.LoginUser(request)
+			return lambdaApp.APIHandler.LoginUser(ctx, request)
 		case "/protected":
 			return middleware.ValidateJWTMiddleWare(ProtectedHandler)(request) // two () () is chaining the functions
 		default:

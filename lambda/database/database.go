@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"lambda-func/types"
 
+	"context"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -15,9 +17,9 @@ const (
 )
 
 type UserStore interface {
-	DoesUserExist(username string) (bool, error)
-	GetUser(username string) (types.User, error)
-	InsertUser(user types.User) error
+	DoesUserExist(ctx context.Context, username string) (bool, error)
+	GetUser(ctx context.Context, username string) (types.User, error)
+	InsertUser(ctx context.Context, user types.User) error
 }
 
 type DynamoDBClient struct {
@@ -36,10 +38,10 @@ func NewDynamoDBClient() DynamoDBClient {
 //* Does this user exists?
 //* How do i insert a new record into DynamoDB?
 
-func (u DynamoDBClient) DoesUserExist(username string) (bool, error) {
-	result, err := u.dataBaseStore.GetItem(&dynamodb.GetItemInput{ // using & by AWS design. Pass by reference is more performant
+func (u DynamoDBClient) DoesUserExist(ctx context.Context, username string) (bool, error) {
+	result, err := u.dataBaseStore.GetItemWithContext(ctx, &dynamodb.GetItemInput{ //* using & by AWS design, pass by reference for performance
 		TableName: aws.String(TABLE_NAME),
-		Key: map[string]*dynamodb.AttributeValue{ // basically the records we are looking for. We are looking for primary key - username
+		Key: map[string]*dynamodb.AttributeValue{ //* basically what we're looking for, key-value pair, primary key
 			"username": {
 				S: aws.String(username),
 			},
@@ -48,16 +50,13 @@ func (u DynamoDBClient) DoesUserExist(username string) (bool, error) {
 	if err != nil {
 		return true, err
 	}
-
 	if result.Item == nil {
 		return false, nil
 	}
-
 	return true, nil
 }
 
-func (u DynamoDBClient) InsertUser(user types.User) error {
-	// assemble the item
+func (u DynamoDBClient) InsertUser(ctx context.Context, user types.User) error {
 	item := &dynamodb.PutItemInput{
 		TableName: aws.String(TABLE_NAME),
 		Item: map[string]*dynamodb.AttributeValue{
@@ -69,19 +68,18 @@ func (u DynamoDBClient) InsertUser(user types.User) error {
 			},
 		},
 	}
-	// insert the item
-	_, err := u.dataBaseStore.PutItem(item)
+
+	_, err := u.dataBaseStore.PutItemWithContext(ctx, item)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (u DynamoDBClient) GetUser(username string) (types.User, error) {
+func (u DynamoDBClient) GetUser(ctx context.Context, username string) (types.User, error) {
 	var user types.User
 
-	result, err := u.dataBaseStore.GetItem(&dynamodb.GetItemInput{
+	result, err := u.dataBaseStore.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		TableName: aws.String(TABLE_NAME),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
@@ -89,6 +87,7 @@ func (u DynamoDBClient) GetUser(username string) (types.User, error) {
 			},
 		},
 	})
+
 	if err != nil {
 		return user, err
 	}

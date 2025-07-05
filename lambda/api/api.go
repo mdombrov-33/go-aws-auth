@@ -7,7 +7,10 @@ import (
 	"lambda-func/types"
 	"net/http"
 
+	"context"
+
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-xray-sdk-go/xray"
 )
 
 type ApiHandler struct {
@@ -21,7 +24,7 @@ func NewApiHandler(dbStore database.UserStore) ApiHandler {
 	}
 }
 
-func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (api ApiHandler) RegisterUserHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fmt.Println("RegisterUserHandler called")
 
 	var registerUser types.RegisterUser
@@ -46,7 +49,13 @@ func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest)
 	}
 
 	//* does a user with this username already exist?
-	userExists, err := api.dbStore.DoesUserExist(registerUser.Username)
+	var userExists bool
+	err = xray.Capture(ctx, "DoesUserExist", func(ctx context.Context) error {
+		var innerErr error
+		userExists, innerErr = api.dbStore.DoesUserExist(ctx, registerUser.Username)
+		return innerErr
+	})
+
 	if err != nil {
 		fmt.Println("Error checking if user exists:", err)
 		return events.APIGatewayProxyResponse{
@@ -74,7 +83,7 @@ func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest)
 
 	//* we know that a user does not exists
 	//* insert the user into the database
-	err = api.dbStore.InsertUser(user)
+	err = api.dbStore.InsertUser(ctx, user)
 	if err != nil {
 		fmt.Println("Error inserting user into database:", err)
 		return events.APIGatewayProxyResponse{
@@ -90,7 +99,7 @@ func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest)
 	}, nil
 }
 
-func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (api ApiHandler) LoginUser(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fmt.Println("LoginUserHandler called")
 	type LoginRequest struct {
 		Username string `json:"username"`
@@ -110,7 +119,13 @@ func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.A
 
 	fmt.Println("Login attempt for user:", loginRequest.Username)
 
-	user, err := api.dbStore.GetUser(loginRequest.Username)
+	var user types.User
+	err = xray.Capture(ctx, "GetUser", func(ctx context.Context) error {
+		var innerErr error
+		user, innerErr = api.dbStore.GetUser(ctx, loginRequest.Username)
+		return innerErr
+	})
+
 	if err != nil {
 		fmt.Println("Error retrieving user from database:", err)
 		return events.APIGatewayProxyResponse{
