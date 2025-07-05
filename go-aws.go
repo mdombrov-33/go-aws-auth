@@ -36,7 +36,7 @@ func NewGoAwsStack(scope constructs.Construct, id string, props *GoAwsStackProps
 
 		//* use ARM64 architecture for better performance and cost
 		//* need to specify the architecture because linux can operate on both x86 and ARM
-		Architecture: awslambda.Architecture_ARM_64(),
+		Architecture: awslambda.Architecture_X86_64(),
 	})
 
 	//* Grant the lambda function read/write access to the table

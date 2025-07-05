@@ -16,7 +16,7 @@ COPY . .
 
 #* Build the Go application for Linux (because Lambda runs on Linux)
 #* The output binary will be named 'main'
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main .
 
 #* Stage 2: Create the final, smaller image for Lambda
 #* Use a minimal base image (alpine) for a smaller deployment size.
@@ -28,6 +28,8 @@ FROM public.ecr.aws/lambda/go:1
 #* We copy 'main' (the compiled Go binary) to /var/task/
 #* Lambda expects the executable to be at /var/task/
 COPY --from=build /app/main /var/task/
+
+RUN chmod +x /var/task/main
 
 #* Define the command that Lambda will execute when the container starts
 #* This should be the name of our executable
